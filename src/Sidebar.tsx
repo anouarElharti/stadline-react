@@ -1,7 +1,17 @@
 import Input from "@mui/joy/Input";
 import Sheet from "@mui/joy/Sheet";
+import { useContext, useState } from "react";
+import { IssueContext } from './issueContext.jsx';
 
 export default function Sidebar() {
+  const [issuePrompt, setIssuePrompt] = useState<string>("facebook/react/issues/7901");
+  const { dispatch } = useContext<any>(IssueContext);
+
+  const handleIssueChange = (issueNumber:string) => {
+    setIssuePrompt(issueNumber);
+    dispatch({ type: 'SET_ISSUE_NUMBER', payload: issuePrompt });
+  };
+
   return (
     <Sheet
       className="Sidebar"
@@ -19,7 +29,7 @@ export default function Sidebar() {
         borderColor: "divider",
       }}
     >
-      <Input value="facebook/react/issues/7901" />
+      <Input value={issuePrompt} onChange={(e) => handleIssueChange(e.target.value)} />
     </Sheet>
   );
 }

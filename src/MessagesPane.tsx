@@ -2,8 +2,11 @@ import Chip from "@mui/joy/Chip";
 import Sheet from "@mui/joy/Sheet";
 import Stack from "@mui/joy/Stack";
 import Typography from "@mui/joy/Typography";
+import { useContext } from "react";
 import ChatBubble from "./ChatBubble";
+import { IssueContext } from './issueContext.jsx';
 import useFetch from "./useFetch";
+
 
 type User = {
   login: string;
@@ -30,7 +33,8 @@ type Comment = {
 };
 
 export default function MessagesPane() {
-  const issue = useFetch<Issue>({ url: "https://api.github.com/repos/facebook/react/issues/7901" });
+  const { state } = useContext<any>(IssueContext);
+  const issue = useFetch<Issue>({ url: `https://api.github.com/repos/${state.issueNumber}` });
   const comments = useFetch<Comment[]>({ url: issue.data?.comments_url }, { enabled: issue.isFetched });
 
   return (
