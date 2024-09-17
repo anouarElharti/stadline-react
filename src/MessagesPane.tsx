@@ -24,7 +24,7 @@ type Issue = {
   comments_url: string;
 };
 
-type Comment = {
+export type Comment = {
   id: number;
   created_at: string;
   user: User;
@@ -33,14 +33,14 @@ type Comment = {
 };
 
 export default function MessagesPane() {
-  const { state, updateComments } = useContext(IssueContext);
+  const { state, updateComments, filteredComments } = useContext(IssueContext);
   const { issuePrompt } = state;
   const issue = useFetch<Issue>({ url: `https://api.github.com/repos/${issuePrompt}` });
   const comments = useFetch<Comment[]>({ url: issue.data?.comments_url }, { enabled: issue.isFetched });
   
   useEffect(() => {
-    updateComments(comments);
-  }, [comments]);
+    updateComments(filteredComments?.length > 0 ? filteredComments : comments);
+  }, [comments, filteredComments]);
 
   return (
     <Sheet

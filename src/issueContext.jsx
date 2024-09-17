@@ -6,6 +6,7 @@ const initialState = {
   issueNumber: '',
   comments: [],
   issuePrompt: 'facebook/react/issues/7901',
+  filteredUsers: [],
 };
 
 const issueReducer = (state, action) => {
@@ -16,6 +17,10 @@ const issueReducer = (state, action) => {
       return { ...state, comments: action.payload };
     case 'SET_ISSUE_PROMPT':
       return { ...state, issuePrompt: action.payload };
+    case 'SET_FILTERED_USERS':
+      return { ...state, filteredUsers: action.payload };
+    case 'SET_FILTERED_COMMENTS':
+      return { ...state, filteredComments: action.payload };
     default:
       return state;
   };
@@ -35,8 +40,16 @@ export const IssueProvider = ({ children }) => {
     dispatch({ type: 'SET_COMMENTS', payload: newComments });
   };
 
+  const updateFilteredUsers = (newFilteredUsers) => {
+    const filteredComments = state.comments.filter((comment) => {
+      return newFilteredUsers.includes(comment.user);
+    });
+    dispatch({ type: 'SET_FILTERED_COMMENTS', payload: filteredComments });
+    dispatch({ type: 'SET_FILTERED_USERS', payload: newFilteredUsers });
+  };
+
   return (
-    <IssueContext.Provider value={{ state, dispatch, updateIssueNumber, updateIssuePrompt, updateComments }}>
+    <IssueContext.Provider value={{ state, dispatch, updateIssueNumber, updateIssuePrompt, updateComments,updateFilteredUsers, filteredComments }}>
       {children}
     </IssueContext.Provider>
   );

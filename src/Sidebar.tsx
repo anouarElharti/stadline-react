@@ -2,20 +2,21 @@ import { Avatar, Chip, Stack, Typography } from "@mui/joy";
 import Input from "@mui/joy/Input";
 import Sheet from "@mui/joy/Sheet";
 import { useContext, useState } from "react";
-import { User } from './MessagesPane.tsx';
+import { Comment, User } from './MessagesPane.tsx';
 import { IssueContext } from './issueContext.jsx';
 
 export default function Sidebar() {
-  const { state,updateIssuePrompt } = useContext<any>(IssueContext);
+  const { state, updateIssuePrompt, updateFilteredUsers } = useContext<any>(IssueContext);
   const [issuePrompt, setIssuePrompt] = useState<string>("facebook/react/issues/7901");
-  const users: User[] = [];
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   
   const { comments } = state;
+  const users: User[] = comments?.data.filter((comment:Comment) => comment.user.login != '');
 
   console.log('comments',comments?.data);
+  console.log('users',users);
 
-  // Calculate the number of messages per user
-  const messagesPerUser = comments.reduce((acc, comment) => {
+  const messagesPerUser = comments.reduce((acc, comment: Comment) => {
     acc[comment.user.login] = (acc[comment.user.login] || 0) + 1;
     return acc;
   }, {});
@@ -25,6 +26,14 @@ export default function Sidebar() {
     updateIssuePrompt(issueNumber);
   };
 
+  const handleUserFilter = (filteredUser:User) => {
+    if (filteredUsers.some((user: User) => user.login === filteredUser.login)) {
+      updateFilteredUsers(filteredUsers.filter((user:User) => user.login !== filteredUser.login));
+    } else {
+      updateFilteredUsers([...filteredUsers, filteredUser]);
+    }
+  };
+  
   return (
     <Sheet
       className="Sidebar"
@@ -47,7 +56,10 @@ export default function Sidebar() {
       {users?.map((user: User) => (
         <Stack direction="row" alignItems="center" spacing={1}>
           <Avatar size="sm" variant="solid" src={user.avatar_url} />
-          <Typography level="body-sm">{user.login}</Typography>
+          <Typography level="body-sm">
+            {user.login}
+            <input type="checkbox" checked={filteredUsers.some((filteredUser: User) => filteredUser.login === user.login)} onChange={() => handleUserFilter(user)}/>
+          </Typography>
           <Chip variant="outlined" size="sm" color="neutral">
             {messagesPerUser[user.login] || 0} messages
           </Chip>
