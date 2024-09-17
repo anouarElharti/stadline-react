@@ -1,6 +1,6 @@
 import { UndefinedInitialDataInfiniteOptions, useInfiniteQuery } from "@tanstack/react-query";
-import { parse } from "http-link-header";
 import axios, { AxiosRequestConfig } from "axios";
+import { parse } from "http-link-header";
 
 function useFetch<T>(
   config: AxiosRequestConfig,
@@ -27,6 +27,7 @@ function useFetch<T>(
     },
     initialPageParam: config.url,
     getNextPageParam: (lastPage) => {
+      console.log('headers',lastPage.headers);
       if (!(lastPage.data instanceof Array && lastPage.headers.link)) return;
       return parse(lastPage.headers.link).get("rel", "next")[0]?.uri;
     },

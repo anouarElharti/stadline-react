@@ -2,13 +2,13 @@ import Chip from "@mui/joy/Chip";
 import Sheet from "@mui/joy/Sheet";
 import Stack from "@mui/joy/Stack";
 import Typography from "@mui/joy/Typography";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import ChatBubble from "./ChatBubble";
 import { IssueContext } from './issueContext.jsx';
 import useFetch from "./useFetch";
 
 
-type User = {
+export type User = {
   login: string;
   avatar_url: string;
 };
@@ -33,9 +33,14 @@ type Comment = {
 };
 
 export default function MessagesPane() {
-  const { state } = useContext<any>(IssueContext);
-  const issue = useFetch<Issue>({ url: `https://api.github.com/repos/${state.issueNumber}` });
+  const { state, updateComments } = useContext(IssueContext);
+  const { issuePrompt } = state;
+  const issue = useFetch<Issue>({ url: `https://api.github.com/repos/${issuePrompt}` });
   const comments = useFetch<Comment[]>({ url: issue.data?.comments_url }, { enabled: issue.isFetched });
+  
+  useEffect(() => {
+    updateComments(comments);
+  }, [comments]);
 
   return (
     <Sheet

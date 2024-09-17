@@ -1,15 +1,28 @@
+import { Avatar, Chip, Stack, Typography } from "@mui/joy";
 import Input from "@mui/joy/Input";
 import Sheet from "@mui/joy/Sheet";
 import { useContext, useState } from "react";
+import { User } from './MessagesPane.tsx';
 import { IssueContext } from './issueContext.jsx';
 
 export default function Sidebar() {
+  const { state,updateIssuePrompt } = useContext<any>(IssueContext);
   const [issuePrompt, setIssuePrompt] = useState<string>("facebook/react/issues/7901");
-  const { dispatch } = useContext<any>(IssueContext);
+  const users: User[] = [];
+  
+  const { comments } = state;
 
-  const handleIssueChange = (issueNumber:string) => {
+  console.log('comments',comments?.data);
+
+  // Calculate the number of messages per user
+  const messagesPerUser = comments.reduce((acc, comment) => {
+    acc[comment.user.login] = (acc[comment.user.login] || 0) + 1;
+    return acc;
+  }, {});
+
+  const handleIssueChange = (issueNumber: string) => {
     setIssuePrompt(issueNumber);
-    dispatch({ type: 'SET_ISSUE_NUMBER', payload: issuePrompt });
+    updateIssuePrompt(issueNumber);
   };
 
   return (
@@ -30,6 +43,16 @@ export default function Sidebar() {
       }}
     >
       <Input value={issuePrompt} onChange={(e) => handleIssueChange(e.target.value)} />
+      <hr/>
+      {users?.map((user: User) => (
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <Avatar size="sm" variant="solid" src={user.avatar_url} />
+          <Typography level="body-sm">{user.login}</Typography>
+          <Chip variant="outlined" size="sm" color="neutral">
+            {messagesPerUser[user.login] || 0} messages
+          </Chip>
+        </Stack>
+      ))}
     </Sheet>
   );
 }
