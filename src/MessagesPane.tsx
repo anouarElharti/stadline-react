@@ -2,9 +2,9 @@ import Chip from "@mui/joy/Chip";
 import Sheet from "@mui/joy/Sheet";
 import Stack from "@mui/joy/Stack";
 import Typography from "@mui/joy/Typography";
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import ChatBubble from "./ChatBubble";
-import { IssueContext } from './issueContext.jsx';
+import { useIssueContext } from './issueContext.jsx';
 import useFetch from "./useFetch";
 
 
@@ -33,7 +33,7 @@ export type Comment = {
 };
 
 export default function MessagesPane() {
-  const { state, updateComments, filteredComments } = useContext(IssueContext);
+  const { state, updateComments, filteredComments } = useIssueContext();
   const { issuePrompt } = state;
   const issue = useFetch<Issue>({ url: `https://api.github.com/repos/${issuePrompt}` });
   const comments = useFetch<Comment[]>({ url: issue.data?.comments_url }, { enabled: issue.isFetched });
@@ -86,7 +86,7 @@ export default function MessagesPane() {
           <Typography level="body-sm">{issue.data.user.login}</Typography>
         </Stack>
       )}
-      {comments.data && (
+      {state.filteredComments?.length > 0 ? state.filteredComments : comments.data && (
         <Stack spacing={2} justifyContent="flex-end" px={2} py={3}>
           <ChatBubble variant="solid" {...issue.data!} />
           {comments.data.map((comment) => (

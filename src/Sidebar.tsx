@@ -1,25 +1,18 @@
 import { Avatar, Chip, Stack, Typography } from "@mui/joy";
 import Input from "@mui/joy/Input";
 import Sheet from "@mui/joy/Sheet";
-import { useContext, useState } from "react";
+import { useEffect, useState } from "react";
 import { Comment, User } from './MessagesPane.tsx';
-import { IssueContext } from './issueContext.jsx';
+import { useIssueContext } from './issueContext.jsx';
 
 export default function Sidebar() {
-  const { state, updateIssuePrompt, updateFilteredUsers } = useContext<any>(IssueContext);
+  const { state, updateIssuePrompt, updateFilteredUsers } = useIssueContext();
   const [issuePrompt, setIssuePrompt] = useState<string>("facebook/react/issues/7901");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [userList, setUserList] = useState<User[]>([]);
+  const [messagePerUser, setCountMessagePerUser] = useState<{ [key: string]: number }>({});
   
   const { comments } = state;
-  const users: User[] = comments?.data.filter((comment:Comment) => comment.user.login != '');
-
-  console.log('comments',comments?.data);
-  console.log('users',users);
-
-  const messagesPerUser = comments.reduce((acc, comment: Comment) => {
-    acc[comment.user.login] = (acc[comment.user.login] || 0) + 1;
-    return acc;
-  }, {});
 
   const handleIssueChange = (issueNumber: string) => {
     setIssuePrompt(issueNumber);
@@ -34,6 +27,26 @@ export default function Sidebar() {
     }
   };
   
+  useEffect(() => {
+    const users = Array.isArray(comments) ? comments.reduce((acc, comment) => {
+      if (comment.user) {
+        acc.push(comment.user);
+      }
+      return acc;
+    }, []) : [];
+    setUserList(users);
+  }, [comments]);
+
+  useEffect(() => {
+    const messagesPerUser = Array.isArray(comments)
+    ? comments.reduce((acc, comment: Comment) => {
+        acc[comment.user.login] = (acc[comment.user.login] || 0) + 1;
+        return acc;
+      }, {})
+      : {};
+    setCountMessagePerUser(messagesPerUser);
+  }, [comments]);
+
   return (
     <Sheet
       className="Sidebar"
@@ -53,7 +66,7 @@ export default function Sidebar() {
     >
       <Input value={issuePrompt} onChange={(e) => handleIssueChange(e.target.value)} />
       <hr/>
-      {users?.map((user: User) => (
+      {userList?.map((user: User) => (
         <Stack direction="row" alignItems="center" spacing={1}>
           <Avatar size="sm" variant="solid" src={user.avatar_url} />
           <Typography level="body-sm">
@@ -61,7 +74,7 @@ export default function Sidebar() {
             <input type="checkbox" checked={filteredUsers.some((filteredUser: User) => filteredUser.login === user.login)} onChange={() => handleUserFilter(user)}/>
           </Typography>
           <Chip variant="outlined" size="sm" color="neutral">
-            {messagesPerUser[user.login] || 0} messages
+            {messagePerUser[user.login] || 0} messages
           </Chip>
         </Stack>
       ))}

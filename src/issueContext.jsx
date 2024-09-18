@@ -1,4 +1,4 @@
-import React, { createContext, useReducer } from 'react';
+import React, { createContext, useContext, useReducer } from 'react';
 
 export const IssueContext = createContext();
 
@@ -7,6 +7,7 @@ const initialState = {
   comments: [],
   issuePrompt: 'facebook/react/issues/7901',
   filteredUsers: [],
+  filteredComments: [],
 };
 
 const issueReducer = (state, action) => {
@@ -25,6 +26,7 @@ const issueReducer = (state, action) => {
       return state;
   };
 };
+
 export const IssueProvider = ({ children }) => {
   const [state, dispatch] = useReducer(issueReducer, initialState);
 
@@ -49,8 +51,10 @@ export const IssueProvider = ({ children }) => {
   };
 
   return (
-    <IssueContext.Provider value={{ state, dispatch, updateIssueNumber, updateIssuePrompt, updateComments,updateFilteredUsers, filteredComments }}>
+    <IssueContext.Provider value={{ state, dispatch, updateIssueNumber, updateIssuePrompt, updateComments, updateFilteredUsers }}>
       {children}
     </IssueContext.Provider>
   );
 };
+
+export const useIssueContext = () => useContext(IssueContext);
